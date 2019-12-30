@@ -1,17 +1,11 @@
 package com.example.shoparx;
 
-
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.Camera;
 import android.graphics.ImageFormat;
-import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.media.Image;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
@@ -20,34 +14,21 @@ import android.util.Rational;
 import android.util.Size;
 import android.view.Surface;
 import android.view.TextureView;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraX;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageAnalysisConfig;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureConfig;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.core.PreviewConfig;
-import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.LifecycleOwner;
-
 import org.jetbrains.annotations.NotNull;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.time.Clock;
-
-import id.zelory.compressor.Compressor;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -63,14 +44,7 @@ public class MainActivity extends AppCompatActivity {
     public static final MediaType MEDIA_TYPE_IMAGE
             = MediaType.parse("image/jpg");
     private final OkHttpClient client = new OkHttpClient();
-    /**
-     * An additional thread for running tasks that shouldn't block the UI.
-     */
     private HandlerThread mBackgroundThread;
-
-    /**
-     * A {@link Handler} for running tasks in the background.
-     */
     private Handler mBackgroundHandler;
 
     @Override
@@ -79,13 +53,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         textureView = findViewById(R.id.view_finder);
-        mFile = new File(this.getExternalFilesDir(null), "pic.jpg");
         startBackgroundThread();
-        try {
-            startCamera();
-        } catch(Exception exc) {
-            Log.i("TAG", exc.getMessage());
-        }
+        startCamera();
     }
 
     private void startCamera() {
@@ -134,33 +103,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-//        ImageCaptureConfig imageCaptureConfig = new ImageCaptureConfig.Builder().setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY)
-//                .setTargetRotation(getWindowManager().getDefaultDisplay().getRotation()).build();
-//        final ImageCapture imgCap = new ImageCapture(imageCaptureConfig);
-
-//        findViewById(R.id.imgCapture).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                File file = new File(Environment.getExternalStorageDirectory() + "/" + System.currentTimeMillis() + ".png");
-//                imgCap.takePicture(file, new ImageCapture.OnImageSavedListener() {
-//                    @Override
-//                    public void onImageSaved(@NonNull File file) {
-//                        String msg = "Pic captured at " + file.getAbsolutePath();
-//                        Toast.makeText(getBaseContext(), msg,Toast.LENGTH_LONG).show();
-//                    }
-//
-//                    @Override
-//                    public void onError(@NonNull ImageCapture.UseCaseError useCaseError, @NonNull String message, @Nullable Throwable cause) {
-//                        String msg = "Pic capture failed : " + message;
-//                        Toast.makeText(getBaseContext(), msg, Toast.LENGTH_LONG).show();
-//                        if(cause != null){
-//                            cause.printStackTrace();
-//                        }
-//                    }
-//                });
-//            }
-//        });
-
         //bind to lifecycle:
         CameraX.bindToLifecycle((LifecycleOwner)this, imageAnalysis, preview);
     }
@@ -171,9 +113,6 @@ public class MainActivity extends AppCompatActivity {
         mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
     }
 
-    /**
-     * Stops the background thread and its {@link Handler}.
-     */
     private void stopBackgroundThread() {
         mBackgroundThread.quitSafely();
         try {
@@ -193,13 +132,10 @@ public class MainActivity extends AppCompatActivity {
             FileOutputStream output = null;
             output = new FileOutputStream(mFile);
             output.write(bytes);
-            //compressedFile = new Compressor(mContext).compressToFile(mFile);
-            // TODO: Send captured image to server
             RequestBody postBodyImage = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
                     .addFormDataPart("image", "imageFromAndroid.jpg", RequestBody.create(mFile, MediaType.parse("image/*jpg")))
                     .build();
-//                RequestBody body = RequestBody.create(mFile, MEDIA_TYPE_IMAGE);
             Request request = new Request.Builder()
                     .url("http://192.168.1.2:5000/upload")
                     .post(postBodyImage)
@@ -292,7 +228,6 @@ public class MainActivity extends AppCompatActivity {
         Matrix mx = new Matrix();
         float w = textureView.getMeasuredWidth();
         float h = textureView.getMeasuredHeight();
-
         float cX = w / 2f;
         float cY = h / 2f;
 
@@ -329,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-//        startBackgroundThread();
+        startBackgroundThread();
     }
 
 
