@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.i("TAG", mMessage);
                 }
             });
-//
+            
         } catch(Exception exc) {
             Log.i("TAG", "EXCEPTION CAUGHT" + exc.getMessage());
         }
@@ -267,8 +267,4 @@ public class MainActivity extends AppCompatActivity {
         startBackgroundThread();
     }
 
-
 }
-
-
-
