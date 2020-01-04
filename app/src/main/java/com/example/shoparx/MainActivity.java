@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import id.zelory.compressor.Compressor;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private final OkHttpClient client = new OkHttpClient();
     private HandlerThread mBackgroundThread;
     private Handler mBackgroundHandler;
+    File compressFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private void startCamera() {
         CameraX.unbindAll();
         mFile = new File(this.getExternalFilesDir(null), "pic.jpg");
+        compressFile = new File(this.getExternalFilesDir(null), "compressedPic.jpg");
         Rational aspectRatio = new Rational(textureView.getWidth(), textureView.getHeight());
         Size screen = new Size(textureView.getWidth(), textureView.getHeight()); //size of the screen
 
@@ -132,9 +136,10 @@ public class MainActivity extends AppCompatActivity {
             FileOutputStream output = null;
             output = new FileOutputStream(mFile);
             output.write(bytes);
+            compressFile = new Compressor(this).compressToFile(mFile);
             RequestBody postBodyImage = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart("image", "imageFromAndroid.jpg", RequestBody.create(mFile, MediaType.parse("image/*jpg")))
+                    .addFormDataPart("image", "imageFromAndroid.jpg", RequestBody.create(compressFile, MediaType.parse("image/*jpg")))
                     .build();
             Request request = new Request.Builder()
                     .url("http://192.168.1.2:5000/upload")
@@ -153,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.i("TAG", mMessage);
                 }
             });
-            
+
         } catch(Exception exc) {
             Log.i("TAG", "EXCEPTION CAUGHT" + exc.getMessage());
         }
